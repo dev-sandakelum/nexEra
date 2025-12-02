@@ -1,71 +1,33 @@
-import { createClient } from '@/lib/supabase/server'
-import { redirect } from 'next/navigation'
+import { SearchHero } from "@/components/dashboard/search-hero"
+import { ResourceCard } from "@/components/dashboard/resource-card"
 
-export default async function DashboardPage() {
-  const supabase = await createClient()
-  
-  const { data: { user }, error } = await supabase.auth.getUser()
+const resources = [
+  { title: "Short Notes", subtitle: "6 COLLECTIONS", icon: "notes" as const },
+  { title: "Quizzes", subtitle: "RESOURCE", icon: "quiz" as const },
+  { title: "PDFs", subtitle: "RESOURCE", icon: "pdf" as const },
+  { title: "Q Gen", subtitle: "RESOURCE", icon: "ai" as const },
+]
 
-  if (error || !user) {
-    redirect('/auth/signin')
-  }
-
-  // Fetch user profile
-  const { data: profile } = await supabase
-    .from('profiles')
-    .select('*')
-    .eq('id', user.id)
-    .single()
-
-  // Fetch user stats
-  const { data: stats } = await supabase
-    .from('user_stats')
-    .select('*')
-    .eq('user_id', user.id)
-    .single()
-
+export default function DashboardPage() {
   return (
-    <div style={{ maxWidth: '800px', margin: '50px auto', padding: '20px' }}>
-      <h1>Dashboard</h1>
-      
-      <div style={{ marginBottom: '30px', padding: '20px', border: '1px solid #ddd', borderRadius: '8px' }}>
-        <h2>User Information</h2>
-        <p><strong>Email:</strong> {user.email}</p>
-        <p><strong>User ID:</strong> {user.id}</p>
-        {profile && (
-          <>
-            <p><strong>Username:</strong> {profile.username}</p>
-            <p><strong>Full Name:</strong> {profile.full_name || 'Not set'}</p>
-          </>
-        )}
+    <div className="mx-auto max-w-6xl px-8 py-16">
+      {/* Hero Section */}
+      <div className="mb-20">
+        <SearchHero />
       </div>
 
-      {stats && (
-        <div style={{ marginBottom: '30px', padding: '20px', border: '1px solid #ddd', borderRadius: '8px' }}>
-          <h2>Stats</h2>
-          <p><strong>Security Level:</strong> {stats.security_level}</p>
-          <p><strong>Total Score:</strong> {stats.total_score}</p>
-          <p><strong>XP Points:</strong> {stats.xp_points}</p>
-          <p><strong>Rank:</strong> {stats.rank}</p>
-        </div>
-      )}
-
-      <form action="/auth/signout" method="post">
-        <button
-          type="submit"
-          style={{
-            padding: '10px 20px',
-            backgroundColor: '#dc2626',
-            color: 'white',
-            border: 'none',
-            borderRadius: '5px',
-            cursor: 'pointer',
-            fontSize: '16px',
-          }}
-        >
-          Sign Out
-        </button>
-      </form>
+      {/* Resource Cards */}
+      <div className="flex flex-wrap justify-center gap-6">
+        {resources.map((resource) => (
+          <ResourceCard
+            key={resource.title}
+            title={resource.title}
+            subtitle={resource.subtitle}
+            icon={resource.icon}
+            href={resource.icon === "notes" ? "/dashboard/notes" : undefined}
+          />
+        ))}
+      </div>
     </div>
   )
 }
